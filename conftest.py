@@ -60,7 +60,6 @@ def create_test_user():
 
 def delete_test_user(email):
     try:
-        # Login first to get token
         login_response = requests.post(
             f"{BASE_API_URL}/auth/login",
             json={"email": email, "password": "TestPass123!"}

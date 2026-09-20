@@ -14,17 +14,22 @@ class ConstructorPage(BasePage):
 
     @allure.step('Нажимаем кнопку "Лента заказов"')
     def click_feed_button(self):
-        return self.click(CommonLocators.FEED_BUTTON)
+        self.click(CommonLocators.FEED_BUTTON)
+        self.wait_for_url_contains("/feed")
 
     @allure.step('Нажимаем кнопку "Личный кбаинет"')
     def click_profile_button(self):
-        return self.click(CommonLocators.PROFILE_BUTTON)
+        self.wait_for_element_invisible(ConstructorLocators.ORDER_MODAL)
+        self.click(CommonLocators.PROFILE_BUTTON)
+        self.wait_for_url_contains("/profile")
 
-    @allure.step('НПолучаем все ингредиенты')
+    @allure.step('Получаем все ингредиенты')
     def get_ingredient_items(self):
+        self.wait_for_element_invisible(CommonLocators.LOADING_OVERLAY)
+        self.wait_for_element(ConstructorLocators.INGREDIENT_CARD)
         return self.find_elements(ConstructorLocators.INGREDIENT_CARD)
 
-    @allure.step('Перемещаем ингедиенты в конктруктор')
+    @allure.step('Перемещаем ингредиенты в конктруктор')
     def move_ingredient(self, ingredient, target_area):
         script = """
         var source = arguments[0];
@@ -76,7 +81,7 @@ class ConstructorPage(BasePage):
         });
         draggable.dispatchEvent(dragEndEvent);
         """
-        self.driver.execute_script(script, ingredient, target_area)
+        self.execute_script(script, ingredient, target_area)
         self.wait_for_element_invisible(ConstructorLocators.INGREDIENT_TARGET, timeout=15)
 
     @allure.step('Проверяем, видна, ли модалка ингредиента"')
@@ -87,21 +92,29 @@ class ConstructorPage(BasePage):
     def wait_for_ingredient_modal_visible(self):
         return self.wait_for_element_visible(ConstructorLocators.INGREDIENT_MODAL)
 
+    @allure.step('Ждем, когда модалка ингредиента будет не видна')
+    def wait_for_ingredient_modal_invisible(self):
+            return self.wait_for_element_invisible(ConstructorLocators.INGREDIENT_MODAL)
+
     @allure.step('Закрываем модалку ингредиента')
     def close_ingredient_modal(self):
-        return self.click(ConstructorLocators.INGREDIENT_MODAL_CLOSE)
+        self.wait_for_ingredient_modal_visible()
+        self.click(ConstructorLocators.INGREDIENT_MODAL_CLOSE)
+        self.wait_for_ingredient_modal_invisible()
 
     @allure.step('Нажимаем "Оформить заказ"')
     def click_order_button(self):
-        return self.click(ConstructorLocators.ORDER_BUTTON)
+        self.click(ConstructorLocators.ORDER_BUTTON)
+        self.wait_for_order_modal_visible()
+        self.wait_fake_order_number_not_present()
 
     @allure.step('Закрываем модалку заказа')
     def close_order_modal(self):
         return self.click(ConstructorLocators.ORDER_MODAL_CLOSE)
 
-    @allure.step('Ждем, когда кнопка "Оформить заказ" будет кликабельна')
-    def wait_for_order_button_clickable(self):
-        return self.wait_for_element_visible(ConstructorLocators.ORDER_BUTTON)
+    @allure.step('Ждем, когда модалка заказа будет видна')
+    def wait_for_order_modal_visible(self):
+        return self.wait_for_element_visible(ConstructorLocators.ORDER_MODAL)
 
     @allure.step('Проверяем, видна ли модалка заказа')
     def is_order_modal_visible(self):
@@ -114,3 +127,16 @@ class ConstructorPage(BasePage):
     @allure.step('Проверяем, отображается ли номер заказа')
     def order_number_visible(self):
         return self.is_element_visible(ConstructorLocators.ORDER_NUMBER)
+
+    @allure.step('Находим каунтер ингредиента')
+    def find_ingredient_counter_text(self, ingredient):
+        counter = ingredient.find_element(*ConstructorLocators.INGREDIENT_COUNTER)
+        return counter.text
+
+    @allure.step('Находим место складывания ингредиентов')
+    def find_ingredient_target(self):
+        return self.find_element(ConstructorLocators.INGREDIENT_TARGET)
+
+    @allure.step('Ждем, когда перестанет отображаться промежуточный номер заказа')
+    def wait_fake_order_number_not_present(self):
+        self.wait_text_not_present(ConstructorLocators.ORDER_NUMBER, "9999")

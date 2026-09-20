@@ -27,13 +27,17 @@ class LoginPage(BasePage):
 
     @allure.step('Нажимаем "Восстановить пароль"')
     def click_forgot_password_link(self):
-        return self.click(LoginLocators.FORGOT_PASSWORD_LINK)
+        self.click(LoginLocators.FORGOT_PASSWORD_LINK)
+        self.wait_for_url_contains("/forgot-password")
 
     @allure.step('Заполняем форму логина и входим')
     def login(self, email, password):
+        self.wait_for_element_invisible(CommonLocators.LOADING_OVERLAY)
         self.enter_email(email)
         self.enter_password(password)
-        return self.click_login_button()
+        self.wait_for_element_clickable(LoginLocators.LOGIN_BUTTON)
+        self.click_login_button()
+        self.wait_for_element_invisible(CommonLocators.LOADING_OVERLAY)
 
     @allure.step('Нажимаем "Конструктор"')
     def click_constructor_button(self):

@@ -17,6 +17,7 @@ class BasePage:
     def open(self, path=""):
         full_url = f"{self.url}{path}"
         self.driver.get(full_url)
+        self.wait_for_element_invisible(CommonLocators.LOADING_OVERLAY)
         return self
 
     @allure.step('Находим элемент на странице')
@@ -49,6 +50,7 @@ class BasePage:
 
     @allure.step('Кликаем по элементу')
     def click(self, locator):
+        self.wait_for_element_invisible(CommonLocators.LOADING_OVERLAY)
         element = self.wait_for_element_clickable(locator)
         return element.click()
 
@@ -88,7 +90,11 @@ class BasePage:
         wait = WebDriverWait(self.driver, timeout)
         return wait.until(EC.url_contains(substring))
 
-    @allure.step('Ждем, пока лоадер исчезнет')
-    def wait_for_loader_to_disappear(self):
-        self.wait_for_element_invisible(CommonLocators.LOADING_OVERLAY)
-    
+    @allure.step('Ждем, пока текст не перестает отображаться')
+    def wait_text_not_present(self, locator, substring, timeout=30):
+        wait = WebDriverWait(self.driver, timeout)
+        return wait.until_not(EC.text_to_be_present_in_element(locator, substring))
+
+    @allure.step('Выполняем скрипт')
+    def execute_script(self, script, *args):
+        return self.driver.execute_script(script, *args)

@@ -1,7 +1,6 @@
 import pytest
 from pages.login_page import LoginPage
 from pages.forgot_password_page import ForgotPasswordPage
-from locators.forgot_password_locators import ForgotPasswordLocators
 import allure
 
 
@@ -12,10 +11,7 @@ class TestPasswordRecovery:
     def test_navigate_to_forgot_password_from_login_page(self, browser):
         login_page = LoginPage(browser)
         login_page.open()
-        login_page.wait_for_loader_to_disappear()
         login_page.click_forgot_password_link()
-        forgot_page = ForgotPasswordPage(browser)
-        forgot_page.wait_for_url_contains("/forgot-password")
         assert "/forgot-password" in browser.current_url
 
     @allure.title('Проверка ввода пароля и нажатия "Восстановить"')
@@ -26,7 +22,6 @@ class TestPasswordRecovery:
         test_email = "test@example.com"
         forgot_page.enter_email(test_email)
         forgot_page.click_recover_button()
-        forgot_page.wait_for_url_contains("/reset-password")
         assert "/reset-password" in browser.current_url
 
     @allure.title('Проверка подсветки поля пароля при нажатии тоггла')
@@ -37,8 +32,5 @@ class TestPasswordRecovery:
         test_email = "test@example.com"
         forgot_page.enter_email(test_email)
         forgot_page.click_recover_button()
-        forgot_page.wait_for_url_contains("/reset-password")
-        forgot_page.wait_for_loader_to_disappear()
         forgot_page.click_show_password_toggle()
-        forgot_page.wait_for_element(ForgotPasswordLocators.PW_FOCUSED_INPUT)
         assert forgot_page.is_pw_input_focused()

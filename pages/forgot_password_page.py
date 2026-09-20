@@ -18,12 +18,18 @@ class ForgotPasswordPage(BasePage):
 
     @allure.step('Нажимаем кнопку "Восстановить"')
     def click_recover_button(self):
-        return self.click(ForgotPasswordLocators.FORGOT_RECOVER_BUTTON)
+        self.click(ForgotPasswordLocators.FORGOT_RECOVER_BUTTON)
+        self.wait_for_url_contains("/reset-password")
 
     @allure.step('Нажимаем тоггл просмотра пароля')
     def click_show_password_toggle(self):
-        return self.click(ForgotPasswordLocators.SHOW_PASSWORD_TOGGLE)
+        self.click(ForgotPasswordLocators.SHOW_PASSWORD_TOGGLE)
+        self.wait_pw_input_focused()
 
     @allure.step('Проверяем, что поле пароля подсвечено')
     def is_pw_input_focused(self):
         return self.is_element_present(ForgotPasswordLocators.PW_FOCUSED_INPUT)
+
+    @allure.step('Проверяем, что поле пароля подсвечено')
+    def wait_pw_input_focused(self):
+        return self.wait_for_element(ForgotPasswordLocators.PW_FOCUSED_INPUT)
